@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+cat > .gitignore << 'EOF'
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+data/
+vector_db/
+results/
+config/
+.vscode/
+.idea/
+models/
