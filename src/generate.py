@@ -1,7 +1,7 @@
 import json
 import time
 from tqdm import tqdm # 如果没装，执行 pip install tqdm
-from rag.src.rerank_utils import retrieve, bge_pointwise_rerank, colbert_rerank, deepseek_listwise_rerank, deepseek_pairwise_rerank, generate, get_chunks_by_question_id, deepseek_setselection
+from src.rerank_utils import retrieve, bge_pointwise_rerank, colbert_rerank, deepseek_listwise_rerank, deepseek_pairwise_rerank, generate, get_chunks_by_question_id, deepseek_setselection
 import numpy as np
 import re
 import string
@@ -32,7 +32,7 @@ def evaluate_rag_system(test_questions, rerank_strategy, top_k_for_gen=5, skip_r
             else:
     
                 # 1. 统一初筛 (所有算法共用同一次检索)
-                initial_ids, initial_chunks, _ = retrieve(question, top_k=50)
+                initial_ids, initial_chunks, _ = retrieve(question, top_k=20)
                 
                 # 2. 执行具体的排序策略
                 # 这个函数会在内部调用你写的各类算法

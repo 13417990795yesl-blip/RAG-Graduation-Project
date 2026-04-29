@@ -15,20 +15,20 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 # 全局加载缓存（只加载一次）
-with open('/data1/yesiliang/rag/vector_db/colbert_multifieldqa/colbert_cache.pkl', 'rb') as f:
+with open('/data1/yesiliang/rag/vector_db/colbert_cache.pkl', 'rb') as f:
     COLBERT_CACHE = pickle.load(f)
     
 load_dotenv("/data1/yesiliang/rag/config/.env")
 
 # 客户端初始化
 # 如果想保存到磁盘，建议使用 PersistentClient:
-#client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/multifieldqa")
+client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/multifieldqa")
 #client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/contextual_multifieldqa") 
-client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/dureader")
+#client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/dureader")
 # 获取或创建集合
-#collection_name = "baai_bge_collection"
+collection_name = "baai_bge_collection"
 #collection_name = "contextual_collection"
-collection_name = "dureader_collection"
+#collection_name = "dureader_collection"
 collection = client.get_or_create_collection(name=collection_name)
 
 # 初始化DeepSeek客户端
@@ -191,75 +191,75 @@ def retrieve(query: str, top_k: int):
     
     return ids, documents, scores
 
-# def generate(query: str, chunks: List[str]) -> str:
-#     # 1. 增加安全检查：如果没有检索到任何片段
-#     if not chunks:
-#         return "抱歉，在现有的知识库中没有找到相关信息来回答这个问题。"
-
-#     chunks_text = "\n\n".join([f"【片段{i+1}】: {chunk}" for i, chunk in enumerate(chunks)])
-    
-#     # 2. 优化 Prompt：增加逻辑限定
-#     prompt = f"""你是一位专业的知识助手。请基于下方提供的“相关片段”来回答“问题”。
-
-# ### 问题: 
-# {query}
-
-# ### 相关片段:
-# {chunks_text}
-
-# ### 要求:
-# 请直接给出答案，不要有任何多余的解释，尽量简短。
-
-# ### 回答：
-# """
-
-#     try:
-#         response = deepseek_client.chat.completions.create(
-#             model="deepseek-chat",
-#             messages=[
-#                 {"role": "system", "content": "你是一位专业的知识助手，擅长从给定文档中提取准确信息。"},
-#                 {"role": "user", "content": prompt}
-#             ],
-#             temperature=0.3,  # 低温度：增加回答的确定性和准确性，减少随机性
-#             stream=False      # 如果需要流式输出，请改为 True 并修改返回逻辑
-#         )
-#         return response.choices[0].message.content
-#     except Exception as e:
-#         return f"生成答案时出错: {str(e)}"
-
 def generate(query: str, chunks: List[str]) -> str:
+    # 1. 增加安全检查：如果没有检索到任何片段
     if not chunks:
         return "抱歉，在现有的知识库中没有找到相关信息来回答这个问题。"
 
-    # 拼接上下文（即检索回来的片段）
-    context = "\n\n".join(chunks)
+    chunks_text = "\n\n".join([f"【片段{i+1}】: {chunk}" for i, chunk in enumerate(chunks)])
     
-    prompt = f"""请基于下面“文档”中的内容回答问题。
+    # 2. 优化 Prompt：增加逻辑限定
+    prompt = f"""你是一位专业的知识助手。请基于下方提供的“相关片段”来回答“问题”。
 
-# ###问题：
-#{query}
+### 问题: 
+{query}
 
-# ###文档：
-#{context}
+### 相关片段:
+{chunks_text}
 
-# ###要求：
-#请直接给出答案。不要输出任何多余的解释或寒暄。尽量简洁。
+### 要求:
+请直接给出答案，不要有任何多余的解释，尽量简短。
 
-# ###答案：
-#"""
-    
+### 回答：
+"""
+
     try:
         response = deepseek_client.chat.completions.create(
             model="deepseek-v4-flash",
             messages=[
+                {"role": "system", "content": "你是一位专业的知识助手，擅长从给定文档中提取准确信息。"},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3,
-            stream=False
+            temperature=0.3,  # 低温度：增加回答的确定性和准确性，减少随机性
+            stream=False      # 如果需要流式输出，请改为 True 并修改返回逻辑
         )
         return response.choices[0].message.content
     except Exception as e:
         return f"生成答案时出错: {str(e)}"
+
+# def generate(query: str, chunks: List[str]) -> str:
+#     if not chunks:
+#         return "抱歉，在现有的知识库中没有找到相关信息来回答这个问题。"
+
+#     # 拼接上下文（即检索回来的片段）
+#     context = "\n\n".join(chunks)
+    
+#     prompt = f"""请基于下面“文档”中的内容回答问题。
+
+# # ###问题：
+# #{query}
+
+# # ###文档：
+# #{context}
+
+# # ###要求：
+# #请直接给出答案。不要输出任何多余的解释或寒暄。尽量简洁。
+
+# # ###答案：
+# #"""
+    
+#     try:
+#         response = deepseek_client.chat.completions.create(
+#             model="deepseek-v4-flash",
+#             messages=[
+#                 {"role": "user", "content": prompt}
+#             ],
+#             temperature=0.3,
+#             stream=False
+#         )
+#         return response.choices[0].message.content
+#     except Exception as e:
+#         return f"生成答案时出错: {str(e)}"
 
 def deepseek_listwise_rerank(query: str, initial_ids: List[str], initial_chunks: List[str]) -> Tuple[List[str], List[str]]:
     """
@@ -297,7 +297,7 @@ def deepseek_listwise_rerank(query: str, initial_ids: List[str], initial_chunks:
 
     try:
         response = deepseek_client.chat.completions.create(
-            model="deepseek-chat",
+            model="deepseek-v4-flash",
             messages=[
                 {"role": "system", "content": "你是一个只输出数字列表的排序机器人。"},
                 {"role": "user", "content": rerank_prompt}
@@ -389,7 +389,7 @@ def deepseek_pairwise_rerank(query: str, initial_ids: List[str], initial_chunks:
 结果:"""
             try:
                 response = deepseek_client.chat.completions.create(
-                    model="deepseek-chat",
+                    model="deepseek-v4-flash",
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0,
                 )
