@@ -16,3 +16,4 @@ config/
 .vscode/
 .idea/
 models/
+results_trimmed/
