@@ -1,3 +1,14 @@
+
+if __package__:
+    from .project_paths import BASE_MODEL_DIR
+else:
+    from project_paths import BASE_MODEL_DIR
+
+if __package__:
+    from .data_utils import read_kb_chunks
+else:
+    from data_utils import read_kb_chunks
+
 import re
 from pathlib import Path
 
@@ -9,24 +20,12 @@ from tqdm import tqdm
 ROOT = Path(__file__).resolve().parents[1]
 KB_FILE = ROOT / "data" / "multihoprag" / "multihoprag_kb.md"
 VECTOR_DB = ROOT / "vector_db" / "multihoprag"
-BASE_MODEL_DIR = ROOT / "models" / "BAAI" / "models--BAAI--bge-m3" / "snapshots" / "5617a9f61b028005a4858fdac845db406aefb181"
+
 COLLECTION_NAME = "multihoprag_bge_collection_no_metadata"
 
 
 def parse_kb():
-    ids = []
-    chunks = []
-    content = KB_FILE.read_text(encoding="utf-8")
-    for block in content.split("---"):
-        block = block.strip()
-        if not block:
-            continue
-        match = re.search(r"\[(题_\d+_块_\d+)\]", block)
-        if not match:
-            continue
-        ids.append(match.group(1))
-        chunks.append(re.sub(r"\[题_\d+_块_\d+\]", "", block).strip())
-    return ids, chunks
+    return read_kb_chunks(KB_FILE)
 
 
 def batches(seq, size):

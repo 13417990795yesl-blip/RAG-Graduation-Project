@@ -1,19 +1,31 @@
+# Runtime and editor caches
 .venv/
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 .ipynb_checkpoints/
-cat > .gitignore << 'EOF'
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-.ipynb_checkpoints/
-data/
-vector_db/
-results/
-config/
+.pytest_cache/
+.ruff_cache/
 .vscode/
 .idea/
-models/
-results_trimmed/
+*.egg-info/
+build/
+dist/
+.DS_Store
+tmp/
+
+# Private configuration; only the blank example is tracked.
+.env
+.env.*
+!.env.example
+config/*
+!config/.env.example
+
+# Local datasets, model weights, databases and experiment outputs
+/data/
+/models/
+/vector_db/
+/results/
+/results_trimmed/
+/stackexchange_data/
+*.log
+*.tmp

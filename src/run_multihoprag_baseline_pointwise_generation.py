@@ -1,5 +1,16 @@
 from __future__ import annotations
 
+if __package__:
+    from .project_paths import BASE_MODEL_DIR, RERANKER_DIR
+else:
+    from project_paths import BASE_MODEL_DIR, RERANKER_DIR
+
+if __package__:
+    from .data_utils import read_kb_chunks
+else:
+    from data_utils import read_kb_chunks
+
+
 import json
 import os
 import argparse
@@ -14,8 +25,12 @@ from FlagEmbedding import BGEM3FlagModel, FlagReranker
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-import generate_multihoprag_english as generation
-import run_multihoprag_llm_resume_eval as llm_eval
+if __package__:
+    from . import generate_multihoprag_english as generation
+    from . import run_multihoprag_llm_resume_eval as llm_eval
+else:
+    import generate_multihoprag_english as generation
+    import run_multihoprag_llm_resume_eval as llm_eval
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,8 +39,8 @@ EVAL_FILE = ROOT / "data" / "multihoprag" / "multihoprag_eval.json"
 VECTOR_DB = ROOT / "vector_db" / "multihoprag"
 RESULTS_DIR = ROOT / "results" / "multihoprag"
 
-BASE_MODEL_DIR = ROOT / "models" / "BAAI" / "models--BAAI--bge-m3" / "snapshots" / "5617a9f61b028005a4858fdac845db406aefb181"
-RERANKER_DIR = ROOT / "models" / "BAAI" / "models--BAAI--bge-reranker-v2-m3" / "snapshots" / "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e"
+
+
 
 COLLECTION_NAME = "multihoprag_bge_collection_no_metadata"
 SAMPLE_SIZE = int(os.environ.get("MULTIHOPRAG_SAMPLE_SIZE", "50"))
@@ -35,19 +50,7 @@ METHODS = ("baseline", "pointwise", "colbert", "colbert_direct")
 
 
 def parse_kb(path: Path = KB_FILE) -> tuple[list[str], list[str]]:
-    content = path.read_text(encoding="utf-8")
-    ids = []
-    chunks = []
-    for block in content.split("---"):
-        block = block.strip()
-        if not block:
-            continue
-        match = re.search(r"\[(题_\d+_块_\d+)\]", block)
-        if not match:
-            continue
-        ids.append(match.group(1))
-        chunks.append(re.sub(r"\[题_\d+_块_\d+\]", "", block).strip())
-    return ids, chunks
+    return read_kb_chunks(path)
 
 
 def atomic_write_json(path: Path, payload) -> None:

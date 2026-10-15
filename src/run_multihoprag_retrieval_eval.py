@@ -1,3 +1,14 @@
+
+if __package__:
+    from .project_paths import BASE_MODEL_DIR, RERANKER_DIR
+else:
+    from project_paths import BASE_MODEL_DIR, RERANKER_DIR
+
+if __package__:
+    from .data_utils import read_kb_chunks
+else:
+    from data_utils import read_kb_chunks
+
 import json
 import re
 from pathlib import Path
@@ -16,8 +27,8 @@ EVAL_FILE = ROOT / "data" / "multihoprag" / "multihoprag_eval.json"
 VECTOR_DB = ROOT / "vector_db" / "multihoprag"
 RESULTS_DIR = ROOT / "results"
 
-BASE_MODEL_DIR = ROOT / "models" / "BAAI" / "models--BAAI--bge-m3" / "snapshots" / "5617a9f61b028005a4858fdac845db406aefb181"
-RERANKER_DIR = ROOT / "models" / "BAAI" / "models--BAAI--bge-reranker-v2-m3" / "snapshots" / "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e"
+
+
 
 COLLECTION_NAME = "multihoprag_bge_collection"
 RETRIEVE_TOP_K = 50
@@ -27,19 +38,7 @@ GEN_TOP_K = 5
 
 
 def parse_kb(path: Path) -> tuple[list[str], list[str]]:
-    content = path.read_text(encoding="utf-8")
-    ids = []
-    chunks = []
-    for block in content.split("---"):
-        block = block.strip()
-        if not block:
-            continue
-        match = re.search(r"\[(题_\d+_块_\d+)\]", block)
-        if not match:
-            continue
-        ids.append(match.group(1))
-        chunks.append(re.sub(r"\[题_\d+_块_\d+\]", "", block).strip())
-    return ids, chunks
+    return read_kb_chunks(path)
 
 
 def batched(items: list[str], batch_size: int) -> Iterable[list[str]]:

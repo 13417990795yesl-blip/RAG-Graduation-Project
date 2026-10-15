@@ -1,3 +1,4 @@
+import argparse
 import json
 import re
 from collections import Counter
@@ -12,8 +13,6 @@ CORPUS_SOURCE_FILE = OUT_DIR / "corpus.json"
 QA_SOURCE_FILE = OUT_DIR / "MultiHopRAG.json"
 META_FILE = OUT_DIR / "multihoprag_mini_meta.json"
 
-TMP_CORPUS = Path("/tmp/multihoprag_corpus.json")
-TMP_QA = Path("/tmp/multihoprag_qa.json")
 
 QUESTION_COUNT = 50
 CHUNK_SIZE = 1500
@@ -143,8 +142,12 @@ def build_eval_items(qa_items: list[dict], url_to_chunks: dict[str, list[dict]])
 
 
 def main() -> None:
-    corpus = json.loads(TMP_CORPUS.read_text(encoding="utf-8"))
-    qa_items = json.loads(TMP_QA.read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser(description="Build MultiHop-RAG mini data from original corpus and QA JSON.")
+    parser.add_argument("--corpus", type=Path, default=CORPUS_SOURCE_FILE)
+    parser.add_argument("--qa", type=Path, default=QA_SOURCE_FILE)
+    args = parser.parse_args()
+    corpus = json.loads(args.corpus.read_text(encoding="utf-8"))
+    qa_items = json.loads(args.qa.read_text(encoding="utf-8"))
 
     records, url_to_chunks = build_corpus(corpus)
     eval_items = build_eval_items(qa_items, url_to_chunks)

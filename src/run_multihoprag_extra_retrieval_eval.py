@@ -1,3 +1,9 @@
+
+if __package__:
+    from .project_paths import BASE_MODEL_DIR
+else:
+    from project_paths import BASE_MODEL_DIR
+
 import json
 import hashlib
 import os
@@ -21,7 +27,7 @@ VECTOR_DB = ROOT / "vector_db" / "multihoprag"
 RESULTS_DIR = ROOT / "results"
 ENV_FILE = ROOT / "config" / ".env"
 
-BASE_MODEL_DIR = ROOT / "models" / "BAAI" / "models--BAAI--bge-m3" / "snapshots" / "5617a9f61b028005a4858fdac845db406aefb181"
+
 COLLECTION_NAME = "multihoprag_bge_collection"
 
 RETRIEVE_TOP_K = 50

@@ -1,10 +1,13 @@
 [project]
 name = "rag"
 version = "0.1.0"
-description = "Add your description here"
+description = "RAG retrieval, reranking and answer-generation experiments for a graduation project"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "numpy>=1.26.4",
+    "torch>=2.6",
+    "tqdm>=4.67",
     "chromadb>=1.4.0",
     "datasets>=4.8.4",
     "flagembedding>=1.4.0",
@@ -17,3 +20,9 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "sentence-transformers>=5.2.0",
 ]
+
+[project.optional-dependencies]
+figures = ["matplotlib>=3.10"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,3 +1,9 @@
+
+if __package__:
+    from .project_paths import BASE_MODEL_DIR, RERANKER_DIR, PROJECT_ROOT
+else:
+    from project_paths import BASE_MODEL_DIR, RERANKER_DIR, PROJECT_ROOT
+
 import os
 from typing import List
 import chromadb
@@ -15,16 +21,14 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 # 全局加载缓存（只加载一次）
-with open('/data1/yesiliang/rag/vector_db/colbert_cache.pkl', 'rb') as f:
+with open(PROJECT_ROOT / 'vector_db/colbert_cache.pkl', 'rb') as f:
     COLBERT_CACHE = pickle.load(f)
     
-load_dotenv("/data1/yesiliang/rag/config/.env")
+load_dotenv(PROJECT_ROOT / "config/.env")
 
 # 客户端初始化
 # 如果想保存到磁盘，建议使用 PersistentClient:
-client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/multifieldqa")
-#client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/contextual_multifieldqa") 
-#client = chromadb.PersistentClient(path="/data1/yesiliang/rag/vector_db/dureader")
+client = chromadb.PersistentClient(path=str(PROJECT_ROOT / "vector_db/multifieldqa"))
 # 获取或创建集合
 collection_name = "baai_bge_collection"
 #collection_name = "contextual_collection"
@@ -38,12 +42,12 @@ deepseek_client = OpenAI(
 )
 
 # 初始化模型
-BASE_MODEL_DIR = '/data1/yesiliang/rag/models/BAAI/models--BAAI--bge-m3/snapshots/5617a9f61b028005a4858fdac845db406aefb181'
-RERANKER_DIR = '/data1/yesiliang/rag/models/BAAI/models--BAAI--bge-reranker-v2-m3/snapshots/953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e'
 
-embedding_model = SentenceTransformer(BASE_MODEL_DIR)
-colbert_model = BGEM3FlagModel(BASE_MODEL_DIR, use_fp16=True)
-reranker_model = FlagReranker(RERANKER_DIR, use_fp16=True)
+
+
+embedding_model = SentenceTransformer(str(BASE_MODEL_DIR))
+colbert_model = BGEM3FlagModel(str(BASE_MODEL_DIR), use_fp16=True)
+reranker_model = FlagReranker(str(RERANKER_DIR), use_fp16=True)
 
 
 def embed_chunk(chunk: str) -> List[float]:

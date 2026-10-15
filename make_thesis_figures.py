@@ -16,14 +16,16 @@ python make_thesis_figures.py
 pip install matplotlib numpy
 """
 
+import argparse
 from pathlib import Path
+from matplotlib import font_manager
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
 
-OUT_DIR = Path("thesis_figures")
-OUT_DIR.mkdir(exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parent
+OUT_DIR = PROJECT_ROOT / "thesis_figures"
 
 
 def setup_chinese_font():
@@ -34,6 +36,9 @@ def setup_chinese_font():
     macOS 常见：PingFang SC, Heiti SC
     Linux 常见：Noto Sans CJK SC, WenQuanYi Micro Hei
     """
+    bundled_font = PROJECT_ROOT / "wqy-microhei.ttc"
+    if bundled_font.is_file():
+        font_manager.fontManager.addfont(str(bundled_font))
     plt.rcParams["font.sans-serif"] = [
         "WenQuanYi Micro Hei"
     ]
@@ -279,6 +284,13 @@ def fig5_multihoprag_metric_gap():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--list-fonts", action="store_true", help="List available Chinese fonts and exit")
+    args = parser.parse_args()
+    if args.list_fonts:
+        print(sorted({font.name for font in font_manager.fontManager.ttflist if any(tag in font.name for tag in ["CJK", "Hei", "Kai", "Song"])}))
+        return
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     setup_chinese_font()
     fig1_rag_pipeline()
     fig2_rerank_strategy_compare()

@@ -1,3 +1,4 @@
+from pathlib import Path
 import json
 import os
 import re
@@ -224,7 +225,7 @@ def generate_contextual_chunks(kb_path):
 
 def load_longbench_dataset_with_chunking():
     # 1. 配置路径
-    dataset_path = "/data1/yesiliang/rag/data/longbench_dureader"  # 你保存数据集的目录
+    dataset_path = str(Path(__file__).resolve().parents[1] / "data/longbench_dureader")  # 你保存数据集的目录
     
     if not os.path.exists(dataset_path):
         print(f"❌ 错误：找不到数据集目录 {dataset_path}。")
